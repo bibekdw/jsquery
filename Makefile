@@ -26,6 +26,8 @@ include $(top_builddir)/src/Makefile.global
 include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
+override CPPFLAGS += $(CPPFLAGS) -I$(srcdir)/include
+
 jsquery_gram.o: jsquery_scan.c
 
 jsquery_gram.c: BISONFLAGS += -d
