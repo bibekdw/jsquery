@@ -93,6 +93,7 @@ PG_FUNCTION_INFO_V1(gin_extract_jsonb_query_value_path);
 PG_FUNCTION_INFO_V1(gin_consistent_jsonb_value_path);
 PG_FUNCTION_INFO_V1(gin_triconsistent_jsonb_value_path);
 PG_FUNCTION_INFO_V1(gin_debug_query_value_path);
+PG_FUNCTION_INFO_V1(gin_debug_jsonpath_value_path);
 
 Datum gin_compare_jsonb_value_path(PG_FUNCTION_ARGS);
 Datum gin_compare_partial_jsonb_value_path(PG_FUNCTION_ARGS);
@@ -101,6 +102,7 @@ Datum gin_extract_jsonb_query_value_path(PG_FUNCTION_ARGS);
 Datum gin_consistent_jsonb_value_path(PG_FUNCTION_ARGS);
 Datum gin_triconsistent_jsonb_value_path(PG_FUNCTION_ARGS);
 Datum gin_debug_query_value_path(PG_FUNCTION_ARGS);
+Datum gin_debug_jsonpath_value_path(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(gin_compare_jsonb_path_value);
 PG_FUNCTION_INFO_V1(gin_compare_partial_jsonb_path_value);
@@ -109,6 +111,7 @@ PG_FUNCTION_INFO_V1(gin_extract_jsonb_query_path_value);
 PG_FUNCTION_INFO_V1(gin_consistent_jsonb_path_value);
 PG_FUNCTION_INFO_V1(gin_triconsistent_jsonb_path_value);
 PG_FUNCTION_INFO_V1(gin_debug_query_path_value);
+PG_FUNCTION_INFO_V1(gin_debug_jsonpath_path_value);
 
 Datum gin_compare_jsonb_path_value(PG_FUNCTION_ARGS);
 Datum gin_compare_partial_jsonb_path_value(PG_FUNCTION_ARGS);
@@ -117,6 +120,7 @@ Datum gin_extract_jsonb_query_path_value(PG_FUNCTION_ARGS);
 Datum gin_consistent_jsonb_path_value(PG_FUNCTION_ARGS);
 Datum gin_triconsistent_jsonb_path_value(PG_FUNCTION_ARGS);
 Datum gin_debug_query_path_value(PG_FUNCTION_ARGS);
+Datum gin_debug_jsonpath_path_value(PG_FUNCTION_ARGS);
 
 static int
 add_entry(Entries *e, Datum key, Pointer extra, bool pmatch)
@@ -742,13 +746,34 @@ gin_debug_query_value_path(PG_FUNCTION_ARGS)
 {
 	JsQuery	   *jq;
 	Entries		e = {0};
+	ExtractedNode *root;
 	char	   *s;
 
 	jq = PG_GETARG_JSQUERY(0);
-	s = debugJsQuery(jq, make_value_path_entry_handler,
+	root = extractJsQuery(jq, make_value_path_entry_handler,
 							check_value_path_entry_handler, (Pointer)&e);
+	s = debugExtractedQuery(root);
+
 	PG_RETURN_TEXT_P(cstring_to_text(s));
 }
+
+#ifndef NO_JSONPATH
+Datum
+gin_debug_jsonpath_value_path(PG_FUNCTION_ARGS)
+{
+	JsonPath   *jp;
+	Entries		e = {0};
+	ExtractedNode *root;
+	char	   *s;
+
+	jp = PG_GETARG_JSONPATH_P(0);
+	root = extractJsonPath(jp, make_value_path_entry_handler,
+						   check_value_path_entry_handler, (Pointer)&e);
+	s = debugExtractedQuery(root);
+
+	PG_RETURN_TEXT_P(cstring_to_text(s));
+}
+#endif
 
 Datum
 gin_extract_jsonb_query_value_path(PG_FUNCTION_ARGS)
@@ -1189,13 +1214,34 @@ gin_debug_query_path_value(PG_FUNCTION_ARGS)
 {
 	JsQuery	   *jq;
 	Entries		e = {0};
+	ExtractedNode *root;
 	char	   *s;
 
 	jq = PG_GETARG_JSQUERY(0);
-	s = debugJsQuery(jq, make_path_value_entry_handler,
-										check_path_value_entry_handler, (Pointer)&e);
+	root = extractJsQuery(jq, make_path_value_entry_handler,
+						  check_path_value_entry_handler, (Pointer)&e);
+	s = debugExtractedQuery(root);
+
 	PG_RETURN_TEXT_P(cstring_to_text(s));
 }
+
+#ifndef NO_JSONPATH
+Datum
+gin_debug_jsonpath_path_value(PG_FUNCTION_ARGS)
+{
+	JsonPath   *jp;
+	Entries		e = {0};
+	ExtractedNode *root;
+	char	   *s;
+
+	jp = PG_GETARG_JSONPATH_P(0);
+	root = extractJsonPath(jp, make_path_value_entry_handler,
+						   check_path_value_entry_handler, (Pointer)&e);
+	s = debugExtractedQuery(root);
+
+	PG_RETURN_TEXT_P(cstring_to_text(s));
+}
+#endif
 
 Datum
 gin_extract_jsonb_query_path_value(PG_FUNCTION_ARGS)
