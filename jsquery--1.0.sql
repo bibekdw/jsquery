@@ -292,7 +292,7 @@ CREATE OR REPLACE FUNCTION gin_debug_query_path_value(jsquery)
 	AS 'MODULE_PATHNAME'
 	LANGUAGE C STRICT IMMUTABLE;
 
--- add support for operator @? (jsonb, jsonpath) if type jsonpath exists in catalog
+-- add support for operators @?, @~ (jsonb, jsonpath) if type jsonpath exists in catalog
 DO LANGUAGE plpgsql
 $$
 BEGIN
@@ -308,8 +308,12 @@ BEGIN
 	IF FOUND THEN
 		ALTER OPERATOR FAMILY jsonb_path_value_ops USING gin
 			ADD OPERATOR 15 @? (jsonb, jsonpath);
+		ALTER OPERATOR FAMILY jsonb_path_value_ops USING gin
+			ADD OPERATOR 16 @~ (jsonb, jsonpath);
 		ALTER OPERATOR FAMILY jsonb_value_path_ops USING gin
 			ADD OPERATOR 15 @? (jsonb, jsonpath);
+		ALTER OPERATOR FAMILY jsonb_value_path_ops USING gin
+			ADD OPERATOR 16 @~ (jsonb, jsonpath);
 
 		CREATE OR REPLACE FUNCTION gin_debug_jsonpath_value_path(jsonpath)
 			RETURNS text
