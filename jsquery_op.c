@@ -29,6 +29,10 @@
 
 #include "jsquery.h"
 
+#ifdef PG_GETARG_JSONB_P
+#define PG_GETARG_JSONB PG_GETARG_JSONB_P
+#endif
+
 static bool recursiveExecute(JsQueryItem *jsq, JsonbValue *jb, JsQueryItem *jsqLeftArg);
 
 static int
